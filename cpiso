@@ -1,0 +1,46 @@
+#!/bin/bash
+#copy files from ISO image into directory
+
+if [ $# -lt 2 ]; then
+	echo "Usage $0 <ISO File> <Target Directory>" >&2;
+	exit 1;
+fi
+
+image="$1"
+if [ ! -f "$image" ]; then
+	echo "\"$image\" is no a file." >&2;
+	hasError=1;
+fi;
+
+rawTarget="$2"
+if [ ${rawTarget:0:1} != "/"  ]; then
+	pwd=`pwd`;
+	if [ "pwd" == "/" ]; then
+		target="$pwd""$rawTarget"
+	else
+		target="$pwd"/"$rawTarget"
+	fi;
+else
+	target="$rawTarget"
+fi;
+if [ ! -d "$target" ]; then
+	echo "\"$rawTarget\" is no a directory." >&2;
+	hasError=1;
+fi;
+
+if [ $hasError ]; then
+	exit 1;
+fi;
+
+tempdir=`mktemp -d`;
+mount -o loop,ro "$image" "$tempdir"
+if [ $? -ne 0 ]; then
+	echo 'Mount image failed.' >&2
+	exit 1;
+fi;
+pushd "$tempdir" &> /dev/null
+cp -a `\ls -A` "$target"
+popd &> /dev/null
+umount "$tempdir"
+rmdir "$tempdir"
+
