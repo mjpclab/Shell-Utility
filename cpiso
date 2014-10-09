@@ -35,6 +35,7 @@ fi;
 tempdir=`mktemp -d`;
 mount -o loop,ro "$image" "$tempdir"
 if [ $? -ne 0 ]; then
+	rmdir "$tempdir"
 	echo 'Mount image failed.' >&2
 	exit 1;
 fi;
