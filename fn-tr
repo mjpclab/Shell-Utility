@@ -1,0 +1,76 @@
+#!/bin/bash
+
+# change filename using command 'tr'
+# Usage: fn-tr -p <tr parameters> -fdr <file/directory> <file/directory> ...
+# -p parameters will transfered to command 'tr'
+# -d change directory
+# -f change normal file
+# -r recursive
+
+trParams='';
+changedir=0;
+changefile=0;
+recurse=0;
+while getopts ':p:dfr' opt; do
+	case $opt in
+		p)
+			trParams=$OPTARG;
+			;;
+		d)
+			changedir=1;
+			;;
+		f)
+			changefile=1;
+			;;
+		r)
+			recurse=1;
+			;;
+	esac;
+done;
+shift $(($OPTIND-1));
+
+function trFile()
+{
+	oldpathname="$1";
+	oldname=$(basename "$oldpathname");
+	path=$(dirname "$oldpathname");
+
+	newname=$(eval "echo '$oldname' | tr $trParams");
+	newpathname=$path'/'$newname;
+
+	oldpathname=$(echo "$oldpathname" | tr -s '/');
+	oldpathname=${oldpathname#./};
+	oldpathname=${oldpathname%/};
+	newpathname=$(echo "$newpathname" | tr -s '/');
+	newpathname=${newpathname#./};
+	newpathname=${newpathname%/};
+
+	if [ "$oldname" != "$newname" -a -n "$newname" ]; then
+		mv -f "$oldpathname" "$newpathname" &&
+		echo "$oldpathname --> $newpathname [OK]" ||
+		echo "$oldpathname --> $newpathname [Failed]" >&2
+	fi;
+}
+
+function iterateFile()
+{
+	local file;
+	for file in "$@"; do
+		if [ -n "$file" -a -e "$file" ]; then
+			if [ -d "$file" ]; then
+				if [ $recurse -eq 1 ]; then
+					eval "iterateFile '${file%/}'/*"
+				fi;
+				if [ $changedir -eq 1 ]; then trFile "$file"; fi;
+			else
+				if [ $changefile -eq 1 ]; then trFile "$file"; fi;
+			fi;
+		fi;
+	done;
+}
+
+startFiles=$@;
+if [ -z "$startFiles" -o -z "$trParams" ]; then
+	echo "Usage: $(basename $0) -p <tr parameters> -fdr <file/directory> <file/directory> ..." >&2
+fi;
+iterateFile "$@";
