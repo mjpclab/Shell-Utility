@@ -14,7 +14,7 @@ fi;
 
 rawTarget="$2"
 if [ ${rawTarget:0:1} != "/"  ]; then
-	pwd=`pwd`;
+	pwd=$(pwd);
 	if [ "pwd" == "/" ]; then
 		target="$pwd""$rawTarget"
 	else
@@ -32,7 +32,7 @@ if [ $hasError ]; then
 	exit 1;
 fi;
 
-tempdir=`mktemp -d`;
+tempdir=$(mktemp -d);
 mount -o loop,ro "$image" "$tempdir"
 if [ $? -ne 0 ]; then
 	rmdir "$tempdir"
@@ -40,7 +40,7 @@ if [ $? -ne 0 ]; then
 	exit 1;
 fi;
 pushd "$tempdir" &> /dev/null
-cp -a `\ls -A` "$target"
+cp -a $(\ls -A) "$target"
 popd &> /dev/null
 umount "$tempdir"
 rmdir "$tempdir"
