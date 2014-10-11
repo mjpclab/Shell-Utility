@@ -1,0 +1,84 @@
+#!/bin/bash
+
+# change file or directory name to UPPER CASE or LOWER CASE
+# Usage: chfcase [-ludfr] <file/directory> <file/directory> ...
+# -l change file name to lower case (default)
+# -u change file name to upper case
+# -d change directory
+# -f change normal file
+# -r recursive
+
+lower=1;
+changedir=0;
+changefile=0;
+recurse=0;
+while getopts ':ludfr' opt; do
+	case $opt in
+		l)
+			lower=1;
+			;;
+		u)
+			lower=0;
+			;;
+		d)
+			changedir=1;
+			;;
+		f)
+			changefile=1;
+			;;
+		r)
+			recurse=1;
+			;;
+	esac;
+done;
+shift $(($OPTIND-1));
+
+function chFileCase()
+{
+	oldpathname="$1";
+	oldname=$(basename "$oldpathname");
+	path=$(dirname "$oldpathname");
+
+	if [ $lower -eq 1 ]; then
+		newname=$(echo $oldname | tr '[A-Z]' '[a-z]');
+	else
+		newname=$(echo $oldname | tr '[a-z]' '[A-Z]');
+	fi;
+	newpathname=$path'/'$newname;
+
+	oldpathname=$(echo "$oldpathname" | tr -s '/');
+	oldpathname=${oldpathname#./};
+	oldpathname=${oldpathname%/};
+	newpathname=$(echo "$newpathname" | tr -s '/');
+	newpathname=${newpathname#./};
+	newpathname=${newpathname%/};
+
+	if [ "$oldname" != "$newname" -a -n "$newname" ]; then
+		mv -f "$oldpathname" "$newpathname" &&
+		echo "$oldpathname --> $newpathname [OK]" ||
+		echo "$oldpathname --> $newpathname [Failed]" >&2
+	fi;
+}
+
+function iterateFile()
+{
+	local file;
+	for file in "$@"; do
+		if [ -n "$file" -a -e "$file" ]; then
+			if [ -d "$file" ]; then
+				if [ $recurse -eq 1 ]; then
+					eval "iterateFile '${file%/}'/*"
+				fi;
+				if [ $changedir -eq 1 ]; then chFileCase "$file"; fi;
+			else
+				if [ $changefile -eq 1 ]; then chFileCase "$file"; fi;
+			fi;
+		fi;
+	done;
+}
+
+startFiles=$@;
+if [ -z "$startFiles" ]; then
+	echo "Usage: $(basename $0) [-ludfr] <file/directory> <file/directory> ..." >&2
+fi;
+iterateFile "$@";
