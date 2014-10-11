@@ -2,7 +2,7 @@
 #copy files from ISO image into directory
 
 if [ $# -lt 2 ]; then
-	echo "Usage $0 <ISO File> <Target Directory>" >&2;
+	echo "Usage: $(basename $0) <ISO File> <Target Directory>" >&2;
 	exit 1;
 fi
 
