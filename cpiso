@@ -15,7 +15,7 @@ fi;
 rawTarget="$2"
 if [ ${rawTarget:0:1} != "/"  ]; then
 	pwd=$(pwd);
-	if [ "pwd" == "/" ]; then
+	if [ "$pwd" == "/" ]; then
 		target="$pwd""$rawTarget"
 	else
 		target="$pwd"/"$rawTarget"
