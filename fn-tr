@@ -6,6 +6,8 @@
 # -d change directory
 # -f change normal file
 # -r recursive
+# known issues:
+# can not change filename case under MS-Windows
 
 trParams='';
 changedir=0;
@@ -46,9 +48,13 @@ function trFile()
 	newpathname=${newpathname%/};
 
 	if [ "$oldname" != "$newname" -a -n "$newname" ]; then
-		mv -f "$oldpathname" "$newpathname" &&
-		echo "$oldpathname --> $newpathname [OK]" ||
-		echo "$oldpathname --> $newpathname [Failed]" >&2
+		if [ ! -e "$newname" ]; then
+			mv -Tn "$oldpathname" "$newpathname" &&
+			echo "$oldpathname --> $newpathname [OK]" ||
+			echo "$oldpathname --> $newpathname [Failed]" >&2
+		else
+			echo "$oldpathname --> $newpathname [Skipped, target exists]" >&2
+		fi;
 	fi;
 }
 
