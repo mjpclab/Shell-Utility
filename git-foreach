@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Search all git repositories under specified directory, and execute git command for each one.
+# Currently only works for non-bare repositories.
+# Usage: git-foreach <base-directory> <command>
+# Example:
+# 	pull all repos: git-foreach /directory/contains/many/repos pull
+
+
+if [ "$#" -lt 2 ]; then
+	echo "Usage: $0 <base-directory> <command>" >&2;
+	exit 1;
+elif [ ! -d "$1" ]; then
+	echo "\"$1\" is not a directory.";
+	exit 1;
+fi
+
+
+
+base_dir="$1";
+shift;
+command=$@;
+
+function isGitRootDir {
+	local checkDir="$1";
+	[ -d "$checkDir"/.git ];
+	return $?;
+}
+
+function walkSubDirs {
+	local dir="$1";
+	if isGitRootDir "$dir"; then
+		pushd "$dir" > /dev/null;
+		echo -e "\033[1mProcessing \"$dir\" ...\033[0m";
+		git $command;
+		echo;
+		popd > /dev/null;
+	else
+		local subdir;
+		find "$dir" -mindepth 1 -maxdepth 1 -type d -print0 2>/dev/null | while read -d $'\0' subdir; do
+			walkSubDirs "$subdir";
+		done;
+	fi;
+}
+
+
+walkSubDirs "$base_dir";
