@@ -5,5 +5,5 @@ install:
 		cpiso \
 		fn-case \
 		fn-tr \
-		git-foreach \
+		git-each-repo \
 	$(PREFIX)/bin;
