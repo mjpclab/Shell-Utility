@@ -2,9 +2,9 @@
 
 # Search all git repositories under specified directory, and execute git command for each one.
 # Currently only works for non-bare repositories.
-# Usage: git-foreach <base-directory> <command>
+# Usage: git-each-repo <base-directory> <command>
 # Example:
-# 	pull all repos: git-foreach /directory/contains/many/repos pull
+# 	pull all repos: git-each-repo /directory/contains/many/repos pull
 
 
 if [ "$#" -lt 2 ]; then
