@@ -28,7 +28,7 @@ function isGitRootDir {
 		local result=$?;
 		popd > /dev/null;
 		return $result;
-	} || return 1;
+	};
 
 }
 
