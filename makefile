@@ -1,4 +1,4 @@
-PREFIX=/usr/local
+PREFIX=/usr/local/bin
 
 install:
 	cp \
@@ -7,4 +7,4 @@ install:
 		fn-case \
 		fn-tr \
 		git-each-repo \
-	$(PREFIX)/bin;
+	$(PREFIX);
