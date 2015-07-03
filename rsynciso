@@ -1,0 +1,87 @@
+#!/bin/bash
+#rsync files from ISO image into directory
+
+#examples
+#
+#rsync all files/sub directories from iso into a directory
+#cpiso dvd.iso /tmp/dvd/
+#
+#rsync all files/sub directories under a specified directory from iso into a directory
+#cpiso dvd.iso:pareht/directory/ /tmp/dvd/
+#
+#rsync a single file from iso into a directory
+#cpiso dvd.iso:path/to/file /tmp/dvd/
+
+if [ $# -lt 2 ]; then
+	echo "Usage: $(basename $0) <ISO File>[:parent/directory] <Target Directory>" >&2;
+	exit 1;
+fi
+
+colonPos=$(expr index "$1" ':');
+if [ $colonPos -eq 0 ]; then
+	colonPos=$(expr length "$1");
+	colonPos=$[colonPos+1];
+fi;
+
+isoPathLength=$[colonPos-1];
+image=${1:0:isoPathLength};
+if [ ! -f "$image" ]; then
+	echo "\"$image\" is no a file." >&2;
+	hasError=1;
+fi;
+
+rawSource=${1:colonPos}
+if [ "${rawSource:0:1}" == '/' ]; then
+	rawSource=${rawSource##/};
+fi;
+if [ -z "$rawSource" ]; then
+	rawSource='.';
+fi;
+
+rawTarget="$2";
+if [ ${rawTarget:0:1} != "/" ]; then
+	pwd=$(pwd);
+	if [ "$pwd" == "/" ]; then
+		target="$pwd""$rawTarget";
+	else
+		target="$pwd"/"$rawTarget";
+	fi;
+else
+	target="$rawTarget";
+fi;
+if [ ! -d "$target" ]; then
+	echo "\"$rawTarget\" is no a directory." >&2;
+	hasError=1;
+fi;
+
+if [ $hasError ]; then
+	exit 2;
+fi;
+
+tempdir=$(mktemp -d);
+mount -o loop,ro "$image" "$tempdir";
+if [ $? -ne 0 ]; then
+	rmdir "$tempdir";
+	echo 'Mount image failed.' >&2;
+	exit 3;
+fi;
+pushd "$tempdir" &> /dev/null;
+
+if [ ! -e "$rawSource" ]; then
+	popd &> /dev/null;
+	umount "$tempdir";
+	rmdir "$tempdir";
+	echo 'Source directory not exists.' >&2;
+	exit 4;
+elif [ -d "$rawSource" ]; then
+	pushd "$rawSource" &> /dev/null;
+	rsync -a $(\ls -A) "$target";
+	popd &> /dev/null;
+elif [ -f "$rawSource" ]; then
+	cp "$rawSource" "$target";
+fi;
+
+popd &> /dev/null;
+umount "$tempdir";
+rmdir "$tempdir";
+
