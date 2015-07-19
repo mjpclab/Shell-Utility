@@ -75,7 +75,7 @@ if [ ! -e "$rawSource" ]; then
 	exit 4;
 elif [ -d "$rawSource" ]; then
 	pushd "$rawSource" &> /dev/null;
-	rsync -a $(\ls -A) "$target";
+	rsync -a --delete ./ "$target";
 	popd &> /dev/null;
 elif [ -f "$rawSource" ]; then
 	cp "$rawSource" "$target";
