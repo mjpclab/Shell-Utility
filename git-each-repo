@@ -1,24 +1,37 @@
 #!/bin/bash
 
 # Search all git repositories under specified directory, and execute git command for each one.
-# Usage: git-each-repo <base-directory> <command>
+# Usage: git-each-repo [-d <base-directory>] <git-sub-command>
 # Example:
-# 	pull all repos: git-each-repo /directory/contains/many/repos pull
+# 	pull all repos: git-each-repo -d /directory/contains/many/repos pull
+
+function showUsage {
+	echo "Usage: `basename $0` [-d <base-directory>] <git-sub-command>" >&2;
+}
+
+[ $# -eq 0 ] && showUsage && exit 1;
+
+while [ $# -gt 0 ]; do
+	if [ "$1" = "-d" ]; then
+		shift;
+		[ $# -eq 0 ] && showUsage && exit 1;
+		base_dir="$1";
+		shift;
+	elif [ "${1:0:2}" = "-d" ]; then
+		base_dir="${1:2}";
+		shift;
+	else
+		command="$command $1";
+		shift;
+	fi
+done;
+
+[ -z "$command" ] && showUsage && exit 1;
+
+[ -z "$base_dir" ] && base_dir=".";
 
 
-if [ "$#" -lt 2 ]; then
-	echo "Usage: $0 <base-directory> <command>" >&2;
-	exit 1;
-elif [ ! -d "$1" ]; then
-	echo "\"$1\" is not a directory.";
-	exit 1;
-fi
-
-
-
-base_dir="$1";
-shift;
-command=$@;
+#################################################
 
 function isGitRootDir {
 	local checkDir="$1";
