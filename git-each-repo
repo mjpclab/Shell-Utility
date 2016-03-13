@@ -49,7 +49,7 @@ function walkSubDirs {
 	local dir="$1";
 	if isGitRootDir "$dir"; then
 		pushd "$dir" > /dev/null && {
-			echo -e "\033[1mProcessing \"$dir\" ...\033[0m";
+			echo -e '\e[1mProcessing "'$dir'" ...\e[0m';
 			git $command;
 			echo;
 			popd > /dev/null;
