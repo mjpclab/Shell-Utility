@@ -1,6 +1,4 @@
-#!/bin/sh
-
-getPrompt() {
+getGitCurrentBranch() {
 	branch=$(git rev-parse --abbrev-ref HEAD 2> /dev/null);
 	if [ -n "$branch" ]; then
 		result="($branch)";
@@ -9,5 +7,5 @@ getPrompt() {
 	echo "$result"
 }
 
-PS1='\n[\u@\h \w] $(getPrompt)\n\$ '
+PS1=$PS1'$(getGitCurrentBranch) '
 
