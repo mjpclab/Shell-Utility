@@ -1,3 +1,5 @@
+#!/bin/sh
+
 getGitCurrentBranch() {
 	branch=$(git rev-parse --abbrev-ref HEAD 2> /dev/null);
 	if [ -n "$branch" ]; then
@@ -7,5 +9,5 @@ getGitCurrentBranch() {
 	echo "$result"
 }
 
-PS1=$PS1'$(getGitCurrentBranch) '
+PS1='\n[\u@\h \w] $(getGitCurrentBranch)\n\$ '
 
