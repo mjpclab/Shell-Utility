@@ -6,7 +6,9 @@
 # 	pull all repos: git-each-repo -d /directory/contains/many/repos pull
 
 function showUsage {
-	echo "Usage: `basename $0` [-d <base-directory>] <git-sub-command>" >&2;
+	echo "Usage: `basename $0` [options] <command>" >&2;
+	echo "	-d <directory>  search for specific directory" >&2;
+	echo "	-e              execute an external command, not a git sub command" >&2;
 }
 
 [ $# -eq 0 ] && showUsage && exit 1;
@@ -19,6 +21,9 @@ while [ $# -gt 0 ]; do
 		shift;
 	elif [ "${1:0:2}" = "-d" ]; then
 		base_dir="${1:2}";
+		shift;
+	elif [ "$1" = "-e" ]; then
+		externalCommand=1;
 		shift;
 	else
 		command="$command $1";
@@ -50,7 +55,11 @@ function walkSubDirs {
 	if isGitRootDir "$dir"; then
 		pushd "$dir" > /dev/null && {
 			echo -e '\e[1mProcessing "'$dir'" ...\e[0m';
-			git $command;
+			if [ -n "$externalCommand" ]; then
+				$command;
+			else
+				git $command;
+			fi;
 			echo;
 			popd > /dev/null;
 		}
