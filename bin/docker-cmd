@@ -5,9 +5,7 @@ if [ $# -lt 2 ]; then
 	exit
 fi;
 
-dockercmd="$(dirname $0)"/docker-cmd
-
-tag="$1"
+image="$1"
 shift
 
-"$dockercmd" node:"$tag" $@
+docker run --rm -v "$(realpath -s .):/mnt" -w '/mnt' "$image" $@
