@@ -8,4 +8,4 @@ fi;
 image="$1"
 shift
 
-docker run --rm -u $(id -u) -v "$(realpath -s .):/mnt" -w '/mnt' "$image" $@
+docker run --rm -ti -u $(id -u) -v "$(realpath -s .):/mnt" -w '/mnt' "$image" $@
