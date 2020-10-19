@@ -54,7 +54,7 @@ function walkSubDirs {
 	local dir="$1";
 	if isGitRootDir "$dir"; then
 		pushd "$dir" > /dev/null && {
-			echo -e '\e[1mProcessing "'$dir'" ...\e[0m';
+			echo -e '\033[1mProcessing "'$dir'" ...\033[0m';
 			if [ -n "$externalCommand" ]; then
 				$command;
 			else
