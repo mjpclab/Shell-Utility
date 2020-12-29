@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Usage:
+# - Get image list by `kubeadm config images list`
+# - Run `bash k8s-from-mirror IMAGE_LIST...`
+
+# Or specify image url like:
+# kubeadm --image-repository registry.cn-hangzhou.aliyuncs.com/google_containers
+
+mirror='registry.cn-hangzhou.aliyuncs.com'
+
+images="$@"
+
+for imagePath in ${images[@]} ; do
+    imageName=$(basename $imagePath)
+    docker image pull $mirror/google_containers/$imageName
+    docker image tag $mirror/google_containers/$imageName $imagePath
+    docker image rm $mirror/google_containers/$imageName
+done
