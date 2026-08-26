@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Usage: cd <fe-dir> && npmlink ../package1 ../package2
+# Register each local dep as a global npm link, then link them into this project.
+# Uses a throwaway global prefix so it never touches /usr/local or your npm config.
+set -euo pipefail
+
+# Throwaway global prefix. Must be an env var, not the --prefix flag: on the
+# command line --prefix would also redirect the local `npm link <name>` step
+# into this dir. As an env var it only sets the global install location.
+export npm_config_prefix="$(mktemp -d)"
+trap 'rm -rf "$npm_config_prefix"' EXIT INT TERM   # auto-clean on exit / Ctrl-C / kill
+
+names=()
+for dep in "$@"; do
+  name=$(node -p "require('$dep/package.json').name")  # package name
+  (cd "$dep" && npm link)                              # register global link: <name> -> this dep
+  names+=("$name")
+done
+
+npm link "${names[@]}"                                 # link all of them into the current project
+echo "linked: ${names[*]}"
