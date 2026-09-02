@@ -4,6 +4,18 @@
 # Uses a throwaway global prefix so it never touches /usr/local or your npm config.
 set -euo pipefail
 
+if [ $# -eq 0 ]; then
+  cat >&2 <<'USAGE'
+Usage: cd <fe-dir> && npmlink <dep-path>...
+
+Register each local dep as a global npm link, then link them into the current project.
+
+Example:
+  npmlink ../package1 ../package2
+USAGE
+  exit 1
+fi
+
 # Throwaway global prefix. Must be an env var, not the --prefix flag: on the
 # command line --prefix would also redirect the local `npm link <name>` step
 # into this dir. As an env var it only sets the global install location.
